@@ -26,84 +26,97 @@
 // STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import QtQuick 2.0
+import QtQuick 2.9
 import QtQuick.Layouts 1.1
+import FontAwesome 1.0
 
-import "../components" as MoneroComponents
+import "." as MoneroComponents
+import "effects/" as MoneroEffects
 
-RowLayout {
+Item {
     id: checkBox
     property alias text: label.text
-    property string checkedIcon: "../images/checkedIcon-black.png"
+    property string checkedIcon: "qrc:///images/check-white.svg"
     property string uncheckedIcon
+    property bool fontAwesomeIcons: false
+    property int imgWidth: 13
+    property int imgHeight: 13
+    property bool toggleOnClick: true
     property bool checked: false
     property alias background: backgroundRect.color
-    property int fontSize: 14 * scaleRatio
+    property bool border: true
+    property int fontSize: 14
     property alias fontColor: label.color
+    property bool iconOnTheLeft: true
     signal clicked()
-    height: 25 * scaleRatio
+    height: 25
+    width: checkBoxLayout.width
 
     function toggle(){
-        checkBox.checked = !checkBox.checked
+        if (checkBox.toggleOnClick) {
+            checkBox.checked = !checkBox.checked
+        }
         checkBox.clicked()
     }
 
     RowLayout {
-        Layout.fillWidth: true
-        Rectangle {
-            anchors.left: parent.left
-            width: 25 * scaleRatio
-            height: checkBox.height - 1
-            radius: 3
-            y: 0
-            color: "transparent"
-            border.color:
-                if(checkBox.checked){
-                    return MoneroComponents.Style.inputBorderColorActive;
-                } else {
-                    return MoneroComponents.Style.inputBorderColorInActive;
-                }
-        }
+        id: checkBoxLayout
+        layoutDirection: iconOnTheLeft ? Qt.LeftToRight : Qt.RightToLeft
+        spacing: 10
 
-        Rectangle {
-            id: backgroundRect
-            anchors.left: parent.left
-            width: 25 * scaleRatio
-            height: checkBox.height - 1
-            y: 1
-            color: "transparent"
+        Item {
+            id: checkMark
+            height: checkBox.height
+            width: checkBox.height
 
-            Image {
-                anchors.centerIn: parent
-                source: checkBox.checkedIcon
-                visible: checkBox.checked
-            }
-
-            MouseArea {
+            Rectangle {
+                id: backgroundRect
+                visible: checkBox.border
                 anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    toggle()
+                radius: 3
+                color: "transparent"
+                border.color:
+                    if(checkBox.checked){
+                        return MoneroComponents.Style.inputBorderColorActive;
+                    } else {
+                        return MoneroComponents.Style.inputBorderColorInActive;
+                    }
+            }
+
+            MoneroEffects.ImageMask {
+                id: img
+                visible: checkBox.checked || checkBox.uncheckedIcon != ""
+                anchors.centerIn: parent
+                width: checkBox.imgWidth
+                height: checkBox.imgHeight
+                color: MoneroComponents.Style.defaultFontColor
+                fontAwesomeFallbackIcon: checkBox.fontAwesomeIcons ? getIcon() : FontAwesome.plus
+                fontAwesomeFallbackSize: 14
+                image: checkBox.fontAwesomeIcons ? "" : getIcon()
+
+                function getIcon() {
+                    if (checkBox.checked || checkBox.uncheckedIcon == "")
+                        return checkBox.checkedIcon;
+                    return checkBox.uncheckedIcon;
                 }
             }
         }
 
-        Text {
+        MoneroComponents.TextPlain {
             id: label
             font.family: MoneroComponents.Style.fontRegular.name
             font.pixelSize: checkBox.fontSize
             color: MoneroComponents.Style.defaultFontColor
+            textFormat: Text.RichText
             wrapMode: Text.Wrap
-            Layout.fillWidth: true
-            anchors.left: backgroundRect.right
-            anchors.leftMargin: !isMobile ? 10 : 8
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    toggle()
-                }
-            }
+        }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: {
+            toggle()
         }
     }
 }

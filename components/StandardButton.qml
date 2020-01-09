@@ -26,7 +26,7 @@
 // STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import QtQuick 2.0
+import QtQuick 2.9
 import QtQuick.Layouts 1.1
 
 import "../components" as MoneroComponents
@@ -35,109 +35,119 @@ Item {
     id: button
     property string rightIcon: ""
     property string rightIconInactive: ""
-    property string icon: ""
     property string textColor: button.enabled? MoneroComponents.Style.buttonTextColor: MoneroComponents.Style.buttonTextColorDisabled
-    property string textAlign: rightIcon !== "" ? "left" : "center"
     property bool small: false
     property alias text: label.text
     property int fontSize: {
-        if(small) return 14 * scaleRatio;
-        else return 16 * scaleRatio;
+        if(small) return 14;
+        else return 16;
     }
+    property alias label: label
     signal clicked()
 
-    // Dynamic height/width
-    Layout.minimumWidth: {
-        var _padding = 22;
-        if(button.rightIcon !== ""){
-            _padding += 60;
-        }
+    height: small ?  30 : 36
+    width: buttonLayout.width + 22
+    implicitHeight: height
+    implicitWidth: width
 
-        var _width = label.contentWidth + _padding;
-        if(_width <= 50) {
-            return 60;
-        }
-
-        return _width;
-    }
-
-    height: small ?  30 * scaleRatio : 36 * scaleRatio
-
-    function doClick() {
-        // Android workaround
+    function doClick(){
         releaseFocus();
         clicked();
     }
 
     Rectangle {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        height: parent.height - 1
+        id: buttonRect
+        anchors.fill: parent
         radius: 3
-        color: parent.enabled ? MoneroComponents.Style.buttonBackgroundColor : MoneroComponents.Style.buttonBackgroundColorDisabled
         border.width: parent.focus ? 1 : 0
 
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            hoverEnabled: true
+        state: button.enabled ? "active" : "disabled"
+        Component.onCompleted: state = state
 
-            propagateComposedEvents: true
+        states: [
+            State {
+                name: "hover"
+                when: buttonArea.containsMouse || button.focus
+                PropertyChanges {
+                    target: buttonRect
+                    color: MoneroComponents.Style.buttonBackgroundColorHover
+                }
+            },
+            State {
+                name: "active"
+                when: button.enabled
+                PropertyChanges {
+                    target: buttonRect
+                    color: MoneroComponents.Style.buttonBackgroundColor
+                }
+            },
+            State {
+                name: "disabled"
+                when: !button.enabled
+                PropertyChanges {
+                    target: buttonRect
+                    color: MoneroComponents.Style.buttonBackgroundColorDisabled
+                }
+            }
+        ]
 
-            // possibly do some hover effects here
-            onEntered: {
-//                if(button.enabled) parent.color = Style.buttonBackgroundColorHover;
-//                else parent.color = Style.buttonBackgroundColorDisabledHover;
-            }
-            onExited: {
-//                if(button.enabled) parent.color = Style.buttonBackgroundColor;
-//                else parent.color = Style.buttonBackgroundColorDisabled;
-            }
+        transitions: Transition {
+            enabled: appWindow.themeTransition
+            ColorAnimation { duration: 100 }
         }
     }
 
-    Text {
-        id: label
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
-        anchors.right: parent.right
-        horizontalAlignment: textAlign === "center" ? Text.AlignHCenter : Text.AlignLeft
-        anchors.leftMargin: textAlign === "center" ? 0 : 11
-        font.family: MoneroComponents.Style.fontBold.name
-        font.bold: true
-        font.pixelSize: buttonArea.pressed ? button.fontSize - 1 : button.fontSize
-        color: parent.textColor
-        visible: parent.icon === ""
-    }
-
-    Image {
+    RowLayout {
+        id: buttonLayout
+        height: button.height
+        spacing: 11
         anchors.centerIn: parent
-        visible: parent.icon !== ""
-        source: parent.icon
-    }
 
-    Image {
-        visible: parent.rightIcon !== ""
-        anchors.right: parent.right
-        anchors.rightMargin: 11 * scaleRatio
-        anchors.verticalCenter: parent.verticalCenter
-        width: parent.small ? 16 * scaleRatio : 20 * scaleRatio
-        height: parent.small ? 16 * scaleRatio : 20 * scaleRatio
-        source: {
-            if(parent.rightIconInactive !== "" && !parent.enabled){
-                return parent.rightIconInactive;
+        MoneroComponents.TextPlain {
+            id: label
+            font.family: MoneroComponents.Style.fontBold.name
+            font.bold: true
+            font.pixelSize: button.fontSize
+            color: !buttonArea.pressed ? button.textColor : "transparent"
+            visible: text !== ""
+            themeTransition: false
+
+            MoneroComponents.TextPlain {
+                anchors.centerIn: parent
+                color: button.textColor
+                font.bold: label.font.bold
+                font.family: label.font.family
+                font.pixelSize: label.font.pixelSize - 1
+                text: label.text
+                opacity: buttonArea.pressed ? 1 : 0
+                themeTransition: false
             }
-            return parent.rightIcon;
+        }
+
+        Image {
+            visible: button.rightIcon !== ""
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+            width: button.small ? 16 : 20
+            height: button.small ? 16 : 20
+            source: {
+                if(button.rightIconInactive !== "" && !button.enabled) {
+                    return button.rightIconInactive;
+                }
+                return button.rightIcon;
+            }
         }
     }
 
     MouseArea {
         id: buttonArea
         anchors.fill: parent
+        hoverEnabled: true
         onClicked: doClick()
         cursorShape: Qt.PointingHandCursor
     }
 
+    Keys.enabled: button.visible
     Keys.onSpacePressed: doClick()
+    Keys.onEnterPressed: Keys.onReturnPressed(event)
     Keys.onReturnPressed: doClick()
 }

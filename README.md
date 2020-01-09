@@ -1,6 +1,6 @@
 # Monero GUI
 
-Copyright (c) 2014-2018, The Monero Project
+Copyright (c) 2014-2019, The Monero Project
 
 ## Development resources
 
@@ -9,6 +9,7 @@ Copyright (c) 2014-2018, The Monero Project
 - Mail: [dev@getmonero.org](mailto:dev@getmonero.org)
 - Github: [https://github.com/monero-project/monero-gui](https://github.com/monero-project/monero-gui)
 - IRC: [#monero-dev on Freenode](irc://chat.freenode.net/#monero-dev)
+- Translation platform (Weblate): [translate.getmonero.org](https://translate.getmonero.org)
 
 ## Vulnerability response
 
@@ -55,6 +56,13 @@ There are also several mining pools that kindly donate a portion of their fees, 
 
 See [LICENSE](LICENSE).
 
+## Translations
+
+Do you speak a second language and would like to help translate the Monero GUI? Check out Pootle, our localization platform, at [translate.getmonero.org](https://translate.getmonero.org/projects/monero-gui/). Choose the language and suggest a translation for a string or review an existing one. The Localization Workgroup made [a guide with step-by-step instructions](https://github.com/monero-ecosystem/monero-translations/blob/master/pootle.md) for Pootle.
+&nbsp;
+
+If you need help/support or any info you can contact the localization workgroup on the IRC channel #monero-translations (relayed on matrix/riot and MatterMost) or by email at translate[at]getmonero[dot]org. For more info about the Localization workgroup: [github.com/monero-ecosystem/monero-translations](https://github.com/monero-ecosystem/monero-translations)
+
 ## Installing the Monero GUI from a package
 
 Packages are available for
@@ -67,6 +75,8 @@ Packaging for your favorite distribution would be a welcome contribution!
 
 ## Compiling the Monero GUI from source
 
+*Note*: Qt 5.9.7 is the minimum version required to build the GUI.
+
 ### On Linux:
 
 (Tested on Ubuntu 17.10 x64, Ubuntu 18.04 x64 and Gentoo x64)
@@ -75,19 +85,27 @@ Packaging for your favorite distribution would be a welcome contribution!
 
   - For Debian distributions (Debian, Ubuntu, Mint, Tails...)
 
-	`sudo apt install build-essential cmake libboost-all-dev miniupnpc libunbound-dev graphviz doxygen libunwind8-dev pkg-config libssl-dev libzmq3-dev libsodium-dev libhidapi-dev`
+	`sudo apt install build-essential cmake libboost-all-dev miniupnpc libunbound-dev graphviz doxygen libunwind8-dev pkg-config libssl-dev libzmq3-dev libsodium-dev libhidapi-dev libnorm-dev libusb-1.0-0-dev libpgm-dev`
 
   - For Gentoo
 
 	`sudo emerge app-arch/xz-utils app-doc/doxygen dev-cpp/gtest dev-libs/boost dev-libs/expat dev-libs/openssl dev-util/cmake media-gfx/graphviz net-dns/unbound net-libs/ldns net-libs/miniupnpc net-libs/zeromq sys-libs/libunwind dev-libs/libsodium dev-libs/hidapi`
 
+  - For Fedora
+
+	`sudo dnf install make automake cmake gcc-c++ boost-devel miniupnpc-devel graphviz doxygen unbound-devel libunwind-devel pkgconfig openssl-devel libcurl-devel hidapi-devel libusb-devel zeromq-devel`
+
 2. Install Qt:
 
-  *Note*: Qt 5.7 is the minimum version required to build the GUI. This makes **some** distributions (mostly based on debian, like Ubuntu 16.x or Linux Mint 18.x) obsolete. You can still build the GUI if you install an [official Qt release](https://wiki.qt.io/Install_Qt_5_on_Ubuntu), but this is not officially supported.
+  *Note*: The Qt 5.9.7 or newer requirement makes **some** distributions (mostly based on debian, like Ubuntu 16.x or Linux Mint 18.x) obsolete due to their repositories containing an older Qt version.
+
+ The recommended way is to install 5.9.7 from the [official Qt installer](https://www.qt.io/download-qt-installer) or [compiling it yourself](https://wiki.qt.io/Install_Qt_5_on_Ubuntu). This ensures you have the correct version. Higher versions *can* work but as it differs from our production build target, slight differences may occur.
+
+The following instructions will fetch Qt from your distribution's repositories instead. Take note of what version it installs. Your mileage may vary.
 
   - For Ubuntu 17.10+
 
-    `sudo apt install qtbase5-dev qt5-default qtdeclarative5-dev qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-dialogs qml-module-qtquick-xmllistmodel qml-module-qt-labs-settings qml-module-qt-labs-folderlistmodel qttools5-dev-tools qml-module-qtquick-templates2`
+    `sudo apt install qtbase5-dev qt5-default qtdeclarative5-dev qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-dialogs qml-module-qtquick-xmllistmodel qml-module-qt-labs-settings qml-module-qt-labs-folderlistmodel qttools5-dev-tools qml-module-qtquick-templates2 libqt5svg5-dev`
 
   - For Gentoo
 
@@ -127,7 +145,7 @@ The executable can be found in the build/release/bin folder.
 
 3. Install [monero](https://github.com/monero-project/monero) dependencies:
 
-  `brew install boost --c++11`
+  `brew install boost`
 
   `brew install openssl` - to install openssl headers
 
@@ -141,7 +159,7 @@ The executable can be found in the build/release/bin folder.
 
 4. Install Qt:
 
-  `brew install qt5`  (or download QT 5.8+ from [qt.io](https://www.qt.io/download-open-source/))
+  `brew install qt5`  (or download QT 5.9.7+ from [qt.io](https://www.qt.io/download-open-source/))
 
   If you have an older version of Qt installed via homebrew, you can force it to use 5.x like so:
   
@@ -149,9 +167,8 @@ The executable can be found in the build/release/bin folder.
 
 5. Add the Qt bin directory to your path
 
-    Example: `export PATH=$PATH:$HOME/Qt/5.8/clang_64/bin`
-
-    This is the directory where Qt 5.x is installed on **your** system
+  - Example for Qt: `export PATH=$PATH:$HOME/Qt/5.9.7/clang_64/bin`
+  - Example for Homebrew: `export PATH=$PATH:/usr/local/opt/qt/bin`
 
 6. Grab an up-to-date copy of the monero-gui repository
 
@@ -169,7 +186,7 @@ The executable can be found in the `build/release/bin` folder.
 
 **Note:** Workaround for "ERROR: Xcode not set up properly"
 
-Edit `$HOME/Qt/5.8/clang_64/mkspecs/features/mac/default_pre.prf`
+Edit `$HOME/Qt/5.9.7/clang_64/mkspecs/features/mac/default_pre.prf`
 
 replace
 `isEmpty($$list($$system("/usr/bin/xcrun -find xcrun 2>/dev/null")))`
@@ -191,8 +208,14 @@ The Monero GUI on Windows is 64 bits only; 32-bit Windows GUI builds are not off
 3. Install MSYS2 packages for Monero dependencies; the needed 64-bit packages have `x86_64` in their names
 
     ```
-    pacman -S mingw-w64-x86_64-toolchain make mingw-w64-x86_64-cmake mingw-w64-x86_64-boost mingw-w64-x86_64-openssl mingw-w64-x86_64-zeromq mingw-w64-x86_64-libsodium mingw-w64-x86_64-hidapi
+    pacman -S mingw-w64-x86_64-toolchain make mingw-w64-x86_64-cmake mingw-w64-x86_64-boost mingw-w64-x86_64-openssl mingw-w64-x86_64-zeromq mingw-w64-x86_64-libsodium mingw-w64-x86_64-hidapi mingw-w64-x86_64-protobuf-c mingw-w64-x86_64-libusb
     ```
+
+    Optional : To build the flag `WITH_SCANNER`
+
+      ```
+      pacman -S mingw-w64-x86_64-zbar
+      ```
 
     You find more details about those dependencies in the [Monero documentation](https://github.com/monero-project/monero). Note that that there is no more need to compile Boost from source; like everything else, you can install it now with a MSYS2 package.
 
@@ -203,12 +226,6 @@ The Monero GUI on Windows is 64 bits only; 32-bit Windows GUI builds are not off
     ```
 
     There is no more need to download some special installer from the Qt website, the standard MSYS2 package for Qt will do in almost all circumstances.
-
-    **Note:** There is a known issue that GUI won't lauch properly when building tag v0.13.0.3 with Qt 5.11.2.
-    
-    If your encounter issue with that, please remove current Qt by: `pacman -R mingw-w64-x86_64-qt5`
-    
-    And install 5.11.1 instead by: `pacman -U http://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-qt5-5.11.1-3-any.pkg.tar.xz`
 
 5. Install git
 
@@ -226,9 +243,11 @@ The Monero GUI on Windows is 64 bits only; 32-bit Windows GUI builds are not off
 
     ```
     cd monero-gui
-    ./build.sh
+    source ./build.sh release-static
     cd build
     make deploy
     ```
+
+    **Note:** The use of `source` above is a dirty workaround for a suspected bug in the current QT version 5.11.2-3 available in the MSYS2 packaging system, see https://github.com/monero-project/monero-gui/issues/1559 for more info.
 
 The executable can be found in the `.\release\bin` directory.
